@@ -1,0 +1,25 @@
+{
+  "name": "write-myself",
+  "version": "1.0.0",
+  "description": "Reimplement something",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vivipure/write-myself.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vivipure/write-myself/issues"
+  },
+  "homepage": "https://github.com/vivipure/write-myself#readme",
+  "devDependencies": {
+    "typescript": "^4.6.4",
+    "vitest": "^0.10.2"
+  }
+}
