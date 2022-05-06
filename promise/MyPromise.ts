@@ -9,6 +9,12 @@ type noob = undefined | null;
 
 type PromiseCB = (resolve: PerfectFnType, reject: PerfectFnType) => any;
 
+interface Settled {
+  status: PromiseState.FULFILLED | PromiseState.REJECTED;
+  reason?: any;
+  value?: any;
+}
+
 class UncaughtPromiseError extends Error {
   constructor(msg: string) {
     super(msg);
@@ -16,7 +22,7 @@ class UncaughtPromiseError extends Error {
   }
 }
 
-export default class MyPromise<T extends any = any> {
+export default class MyPromise {
   private thenCbs: PerfectFnType[] = [];
   private catchCbs: PerfectFnType[] = [];
   state = PromiseState.PENDDING;
@@ -181,31 +187,57 @@ export default class MyPromise<T extends any = any> {
     });
   }
 
-  static allSettled(promises: MyPromise[]): MyPromise<Settled[]> {
-    const result = [];
+  static allSettled(promises: MyPromise[]) {
+    const results: Settled[] = [];
     let completCount = 0;
     return new this((resolve) => {
       for (let i = 0; i < promises.length; i++) {
         promises[i]
           .then((value) => {
-            resolve({
+            results[i] = {
               status: PromiseState.FULFILLED,
               value,
-            });
+            };
           })
           .catch((reason) => {
-            resolve({
+            results[i] = {
               reason,
               status: PromiseState.REJECTED,
-            });
+            };
+          })
+          .finally(() => {
+            completCount++;
+            if (completCount === promises.length) {
+              resolve(results);
+            }
           });
       }
     });
   }
-}
+  /**
+   * @param fn {() => MyPromsie} 返回Promise的函数
+   * @param times 重拾的次数
+   * @param times 失败后的间隔
+   * */
+  static retry(fn: () => MyPromise, times: number, delay: number) {
+    return new this((resolve, reject) => {
+      function attemp() {
+        fn()
+          .then(resolve)
+          .catch((err) => {
+            if (times > 0) {
+              times--;
+              setTimeout(() => {
+                attemp();
+              }, delay);
+            } else {
+              reject(err);
+            }
+          });
+      }
+      attemp();
+    });
+  }
 
-interface Settled {
-  status: PromiseState.FULFILLED | PromiseState.REJECTED;
-  reason?: any;
-  value?: any;
+  //
 }
