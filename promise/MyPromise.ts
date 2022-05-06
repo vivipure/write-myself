@@ -88,34 +88,38 @@ export default class MyPromise {
   }
 
   private _onSuccess(value: any) {
-    if (this.state !== PromiseState.PENDDING) return;
+    queueMicrotask(() => {
+      if (this.state !== PromiseState.PENDDING) return;
 
-    // 支持promise值
-    if (value instanceof MyPromise) {
-      value.then(this._onSuccess.bind(this), this._onFail.bind(this));
-      return;
-    }
+      // 支持promise值
+      if (value instanceof MyPromise) {
+        value.then(this._onSuccess.bind(this), this._onFail.bind(this));
+        return;
+      }
 
-    this.value = value;
-    this.state = PromiseState.FULFILLED;
+      this.value = value;
+      this.state = PromiseState.FULFILLED;
 
-    this.runCallbacks();
+      this.runCallbacks();
+    });
   }
   private _onFail(error: any) {
-    if (this.state !== PromiseState.PENDDING) return;
+    queueMicrotask(() => {
+      if (this.state !== PromiseState.PENDDING) return;
 
-    if (error instanceof MyPromise) {
-      error.then(this._onSuccess.bind(this), this._onFail.bind(this));
-      return;
-    }
+      if (error instanceof MyPromise) {
+        error.then(this._onSuccess.bind(this), this._onFail.bind(this));
+        return;
+      }
 
-    // 错误未捕获时进行抛出
-    if (this.catchCbs.length === 0) {
-      throw new UncaughtPromiseError(String(error));
-    }
+      // 错误未捕获时进行抛出
+      if (this.catchCbs.length === 0) {
+        throw new UncaughtPromiseError(String(error));
+      }
 
-    this.value = error;
-    this.runCallbacks();
+      this.value = error;
+      this.runCallbacks();
+    });
   }
 
   private runCallbacks() {
