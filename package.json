@@ -21,5 +21,8 @@
   "devDependencies": {
     "typescript": "^4.6.4",
     "vitest": "^0.10.2"
+  },
+  "dependencies": {
+    "ts-node": "^10.8.0"
   }
 }
